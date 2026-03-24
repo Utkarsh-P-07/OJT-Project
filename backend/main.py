@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import pandas as pd
 import io
+from pypdf import PdfReader
 
 from preprocess import clean_text
 from vectorizer import fit_transform
@@ -31,29 +32,45 @@ async def detect_drift_endpoint(
     threshold: float = 0.3
 ):
     """
-    Upload a CSV with columns: date, text
+    Upload a CSV (date, text columns) or a PDF file.
     Returns drift analysis grouped by date periods.
     """
-    try:
-        contents = await file.read()
-        df = pd.read_csv(io.BytesIO(contents))
-    except Exception:
-        raise HTTPException(status_code=400, detail="Invalid CSV file")
+    contents = await file.read()
+    filename = (file.filename or "").lower()
+
+    # --- Parse input ---
+    if filename.endswith(".pdf"):
+        try:
+            reader = PdfReader(io.BytesIO(contents))
+            text = " ".join(page.extract_text() or "" for page in reader.pages)
+        except Exception:
+            raise HTTPException(status_code=400, detail="Could not parse PDF file.")
+        if not text.strip():
+            raise HTTPException(status_code=400, detail="No text could be extracted from the PDF.")
+        # Single-document PDF: wrap as one period — needs at least 2 for drift
+        raise HTTPException(
+            status_code=400,
+            detail="Single PDF uploaded. For drift detection, use a CSV with multiple date periods, or upload via the frontend which assigns a date."
+        )
+    else:
+        try:
+            df = pd.read_csv(io.BytesIO(contents))
+        except Exception:
+            raise HTTPException(status_code=400, detail="Invalid CSV file.")
 
     if "text" not in df.columns or "date" not in df.columns:
-        raise HTTPException(status_code=400, detail="CSV must have 'date' and 'text' columns")
+        raise HTTPException(status_code=400, detail="CSV must have 'date' and 'text' columns.")
 
     df["date"] = pd.to_datetime(df["date"])
     df = df.sort_values("date")
     df["clean_text"] = df["text"].apply(clean_text)
     df = df[df["clean_text"].str.len() > 0]
 
-    # Group by date and aggregate text per period
     grouped = df.groupby(df["date"].dt.date)["clean_text"].apply(" ".join).reset_index()
     grouped.columns = ["date", "text"]  # type: ignore
 
     if len(grouped) < 2:
-        raise HTTPException(status_code=400, detail="Need at least 2 date periods for drift detection")
+        raise HTTPException(status_code=400, detail="Need at least 2 date periods for drift detection.")
 
     texts = grouped["text"].tolist()
     tfidf_matrix = fit_transform(texts)
@@ -65,7 +82,6 @@ async def detect_drift_endpoint(
 
     results = detect_drift(similarities, threshold)
 
-    # Attach date labels
     dates = grouped["date"].astype(str).tolist()
     for i, r in enumerate(results):
         r["from_date"] = dates[i]

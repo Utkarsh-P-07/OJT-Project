@@ -1,33 +1,51 @@
-import React from "react";
-import { Routes, Route, Link } from "react-router-dom";
+﻿import { Routes, Route, Link, useLocation } from "react-router-dom";
 import InputPage from "./pages/InputPage";
 import Dashboard from "./pages/Dashboard";
+import HowItWorks from "./pages/DescriptionPage";
+import About from "./pages/AboutPage";
+
+const NAV = [
+  { path: "/", label: "Analyze" },
+  { path: "/how-it-works", label: "How it works" },
+  { path: "/dashboard", label: "Results" },
+  { path: "/about", label: "About" },
+];
 
 export default function App() {
+  const { pathname } = useLocation();
+
   return (
-    <div style={{ minHeight: "100vh" }}>
-      <nav style={styles.nav}>
-        <span style={styles.brand}>📰 News Drift Detector</span>
-        <div style={{ display: "flex", gap: "1.5rem" }}>
-          <Link to="/">Analyze</Link>
-          <Link to="/dashboard">Dashboard</Link>
+    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+      <nav className="nav-bar">
+        <Link to="/" className="nav-brand">
+          <span className="nav-brand-dot" />
+          NewsDrift
+        </Link>
+        <div className="nav-links">
+          {NAV.map(({ path, label }) => (
+            <Link
+              key={path}
+              to={path}
+              className={`nav-link${pathname === path ? " active" : ""}`}
+            >
+              {label}
+            </Link>
+          ))}
         </div>
       </nav>
-      <main style={styles.main}>
+
+      <div className="page-wrap">
         <Routes>
           <Route path="/" element={<InputPage />} />
+          <Route path="/how-it-works" element={<HowItWorks />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/about" element={<About />} />
         </Routes>
-      </main>
+      </div>
+
+      <footer className="site-footer">
+        NewsDrift &mdash; OJT Project &mdash; Utkarsh Pandey, MSU 2024-28
+      </footer>
     </div>
   );
 }
-
-const styles = {
-  nav: {
-    display: "flex", alignItems: "center", justifyContent: "space-between",
-    padding: "1rem 2rem", background: "#1e293b", borderBottom: "1px solid #334155",
-  },
-  brand: { fontWeight: 700, fontSize: "1.1rem" },
-  main: { padding: "2rem", maxWidth: "960px", margin: "0 auto" },
-};
