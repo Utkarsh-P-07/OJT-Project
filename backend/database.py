@@ -1,4 +1,4 @@
-﻿from pymongo import MongoClient, DESCENDING
+from pymongo import MongoClient, DESCENDING
 from copy import deepcopy
 from datetime import datetime, timezone
 import os
@@ -12,81 +12,58 @@ db = client[DB_NAME]
 
 drift_results = db["drift_results"]
 run_history   = db["run_history"]
+news_articles = db["news_articles"]
+api_articles = db["api_articles"]
+trend_results = db["trend_results"]
 
-# create indexes once on startup — safe to call repeatedly
-drift_results.create_index("run_id")
-run_history.create_index([("created_at", DESCENDING)])
+# Drift analytics retired in v2 in favor of live trend tracking
 
-def save_run(results: list[dict], source_name: str = "", threshold: float = 0.3, group_by: str = "day") -> str:
-    """
-    Save a full analysis run.
-    Each run gets a unique ID so the history page can show past runs separately.
-    Returns the run_id so the API can pass it back to the frontend.
-    """
-    run_id = str(uuid.uuid4())[:8]   # short ID, readable enough
-    created_at = datetime.now(timezone.utc).isoformat()
+def save_articles(articles: list[dict]):
+    """Store raw CSV Kaggle articles parsed manually for ML Training."""
+    if articles:
+        news_articles.insert_many(articles)
 
-    run_doc = {
-        "run_id": run_id,
-        "source": source_name,
-        "threshold": threshold,
-        "group_by": group_by,
-        "created_at": created_at,
-        "total_periods": len(results),
-        "drift_count": sum(1 for r in results if r.get("drift_detected")),
-    }
-    run_history.insert_one(run_doc)
+def save_live_news(articles: list[dict]):
+    """Store raw API articles securely into the Live News separation layer."""
+    if articles:
+        api_articles.insert_many(articles)
 
-    # tag each result row with the run_id so we can filter later
-    tagged = deepcopy(results)
-    for r in tagged:
-        r["run_id"] = run_id
-        r["created_at"] = created_at
+def get_recent_live_news(limit: int = 2000) -> list[dict]:
+    """Get the most recent LIVE API news exclusively for User Cosine-Similarity computations."""
+    return list(api_articles.find({}, {"_id": 0}).sort("date", DESCENDING).limit(limit))
 
-    if tagged:
-        drift_results.insert_many(tagged)
+def get_all_articles() -> list[dict]:
+    """Fetches ML Model dataset core strictly from Kaggle CSV storage."""
+    return list(news_articles.find({}, {"_id": 0}))
 
-    return run_id
+def get_all_live_news() -> list[dict]:
+    """Fetches API Trend Dataset explicitly for modeling the dashboard trajectories."""
+    return list(api_articles.find({}, {"_id": 0}).sort("date", DESCENDING))
 
-def get_results_by_run(run_id: str) -> list[dict]:
-    return list(drift_results.find({"run_id": run_id}, {"_id": 0}))
-
-def get_latest_results() -> list[dict]:
-    """Fetch results from the most recent run."""
-    latest = run_history.find_one({}, sort=[("created_at", DESCENDING)])
-    if not latest:
-        return []
-    return get_results_by_run(latest["run_id"])
-
-def get_run_history(limit: int = 20) -> list[dict]:
-    """Return recent run summaries for the history panel."""
-    runs = run_history.find({}, {"_id": 0}).sort("created_at", DESCENDING).limit(limit)
-    return list(runs)
-
-def get_stats() -> dict:
-    """Aggregate stats across all runs — used by the /stats endpoint."""
-    total_runs   = run_history.count_documents({})
-    total_drifts = run_history.aggregate([
-        {"$group": {"_id": None, "total": {"$sum": "$drift_count"}}}
-    ])
-    drift_sum = next(total_drifts, {}).get("total", 0)
-
-    # worst single transition ever recorded
-    worst = drift_results.find_one(
-        {"drift_detected": True},
-        sort=[("similarity", 1)],
-        projection={"_id": 0, "from_date": 1, "to_date": 1, "similarity": 1, "run_id": 1}
-    )
-
+def save_trend_result(doc: dict):
+    if "created_at" not in doc:
+        doc["created_at"] = datetime.now(timezone.utc).isoformat()
+    trend_results.insert_one(doc)
+    doc["_id"] = str(doc["_id"])
+def get_dataset_summary() -> dict:
+    """Provide dataset statistics for the Admin view explicitly tracking both layers."""
+    total_articles = news_articles.count_documents({})
+    api_articles_count = api_articles.count_documents({})
+    
+    # get distinct topics from ML set
+    topics = news_articles.distinct("topic")
+    
+    # get date range from ML set
+    oldest = news_articles.find_one({}, sort=[("date", 1)])
+    newest = news_articles.find_one({}, sort=[("date", -1)])
+    
     return {
-        "total_runs":   total_runs,
-        "total_drifts": drift_sum,
-        "worst_transition": worst,
+        "total_articles": total_articles,
+        "api_articles_count": api_articles_count,
+        "unique_topics": len(topics),
+        "topics_list": topics,
+        "date_range": {
+            "oldest": oldest.get("date") if oldest else None,
+            "newest": newest.get("date") if newest else None
+        }
     }
-
-
-def delete_run(run_id: str) -> bool:
-    """Remove a run and all its result rows. Returns True if something was deleted."""
-    r1 = run_history.delete_one({"run_id": run_id})
-    drift_results.delete_many({"run_id": run_id})
-    return r1.deleted_count > 0
