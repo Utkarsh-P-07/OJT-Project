@@ -33,7 +33,7 @@ export default function AboutPage() {
         <div className="dev-row">
           <div
             className="avatar"
-            style={{ width: 40, height: 40, background: "#0c1e38", border: "1px solid #1a3060", fontSize: 15, color: "#6aaaf0" }}
+            style={{ width: 40, height: 40, background: "#dbeafe", border: "1px solid #bfdbfe", fontSize: 15, color: "#1d4ed8" }}
           >
             U
           </div>
@@ -54,7 +54,7 @@ export default function AboutPage() {
             <div key={name} className="mentor-row">
               <div
                 className="avatar"
-                style={{ width: 34, height: 34, background: "#160e30", border: "1px solid #281860", fontSize: 13, color: "#9070e8" }}
+                style={{ width: 34, height: 34, background: "#ede9fe", border: "1px solid #ddd6fe", fontSize: 13, color: "#7c3aed" }}
               >
                 {name.charAt(0)}
               </div>
