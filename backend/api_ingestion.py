@@ -13,14 +13,16 @@ def fetch_live_news() -> list[dict]:
         
     url_template = f"https://newsapi.org/v2/top-headlines?country=us&category={{}}&apiKey={API_KEY}"
     
-    # Map external API categories strictly to our model's supported Topics
+    # Decouple the Live API tracking from the 4 ML Kaggle topics ("World", "Sci/Tech" etc.) 
+    # to yield extremely specific, highly granular Dashboard trajectories.
     category_map = {
         "business": "Business",
-        "science": "Sci/Tech",
-        "technology": "Sci/Tech",
-        "general": "World",
+        "entertainment": "Entertainment",
+        "general": "General News",
+        "health": "Health & Medicine",
+        "science": "Science",
         "sports": "Sports",
-        "health": "Sci/Tech", # Map health into general tech/science bounds
+        "technology": "Technology"
     }
     
     articles_collected = []

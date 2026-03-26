@@ -18,7 +18,7 @@ export default function RoleSelectPage({ onSelectRole }) {
           NewsDrift System
         </div>
         
-        <h2 style={{ fontSize: "2rem", marginBottom: "1rem", color: "white" }}>Select Your Role</h2>
+        <h2 style={{ fontSize: "2rem", marginBottom: "1rem", color: "var(--text-main)" }}>Select Your Role</h2>
         <p style={{ color: "var(--text-muted)", marginBottom: "3rem" }}>
           This system uses role-based access control. Please select your operational context to continue.
         </p>

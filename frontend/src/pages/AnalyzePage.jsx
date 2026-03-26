@@ -80,7 +80,7 @@ export default function AnalyzePage() {
 
         <div>
            {result ? (
-            <div className="glass-panel style-pop" style={{ background: "rgba(0,0,0,0.3)", border: "none" }}>
+            <div className="glass-panel style-pop" style={{ background: "#ffffff", border: "1px solid #e9ecef", boxShadow: "0 2px 4px rgba(0,0,0,0.02)" }}>
               <h2 className="section-title">Results</h2>
               
               <div style={{ marginBottom: "1.5rem" }}>
@@ -91,7 +91,7 @@ export default function AnalyzePage() {
               </div>
 
               <div className="score-card">
-                <div style={{ fontSize: "0.9rem", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "1px" }}>Trend Score</div>
+                <div style={{ fontSize: "0.9rem", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "1px" }}>Live Trend Score</div>
                 <div className={`score-value score-${result.trend_label.split(" ")[0].toLowerCase()}`}>
                   {result.trend_score.toFixed(1)}<span style={{ fontSize: "1.5rem", color: "var(--text-muted)" }}>/100</span>
                 </div>
@@ -102,14 +102,14 @@ export default function AnalyzePage() {
 
               <div style={{ marginTop: "2rem" }}>
                 <h3 style={{ fontSize: "1rem", color: "var(--text-muted)", marginBottom: "0.5rem" }}>Extracted Text Context</h3>
-                <div style={{ background: "rgba(255,255,255,0.05)", padding: "1rem", borderRadius: "8px", fontSize: "0.9rem", color: "var(--text-main)", fontStyle: "italic", whiteSpace: "pre-wrap" }}>
+                <div style={{ background: "#fafafa", padding: "1rem", borderRadius: "8px", fontSize: "0.9rem", color: "var(--text-main)", fontStyle: "italic", whiteSpace: "pre-wrap", border: "1px solid #e9ecef" }}>
                   "{result.original_text}"
                 </div>
               </div>
             </div>
           ) : (
             <div style={{ height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--text-muted)", textAlign: "center", padding: "2rem", border: "1px dashed var(--border-color)", borderRadius: "12px" }}>
-              Submit an article to see its Topic Classification and Trend Score.
+              Submit an article to see its Topic Classification and Live Trend Score plotted against the current web stream.
             </div>
           )}
         </div>

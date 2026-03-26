@@ -50,8 +50,9 @@ def get_dataset_summary() -> dict:
     total_articles = news_articles.count_documents({})
     api_articles_count = api_articles.count_documents({})
     
-    # get distinct topics from ML set
-    topics = news_articles.distinct("topic")
+    # get distinct topics from both sets
+    ml_topics = news_articles.distinct("topic")
+    api_topics = api_articles.distinct("topic")
     
     # get date range from ML set
     oldest = news_articles.find_one({}, sort=[("date", 1)])
@@ -60,8 +61,8 @@ def get_dataset_summary() -> dict:
     return {
         "total_articles": total_articles,
         "api_articles_count": api_articles_count,
-        "unique_topics": len(topics),
-        "topics_list": topics,
+        "unique_ml_topics": len(ml_topics),
+        "unique_api_topics": len(api_topics),
         "date_range": {
             "oldest": oldest.get("date") if oldest else None,
             "newest": newest.get("date") if newest else None

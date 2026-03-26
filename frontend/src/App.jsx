@@ -70,7 +70,7 @@ export default function App() {
           <button 
             onClick={handleLogout} 
             className="btn" 
-            style={{ padding: '0.4rem 1rem', fontSize: '0.9rem', marginLeft: '1rem', background: 'rgba(255,255,255,0.1)' }}
+            style={{ padding: '0.4rem 1rem', fontSize: '0.9rem', marginLeft: '1rem', background: '#fafafa', color: "var(--text-main)", border: '1px solid var(--border-color)' }}
           >
             Switch Role
           </button>

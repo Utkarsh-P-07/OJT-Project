@@ -81,18 +81,21 @@ export default function AdminPanel() {
       <h1 className="page-title">Admin Dashboard</h1>
 
       {summary && (
-        <div className="grid-3" style={{ marginBottom: "2rem" }}>
+        <div className="grid-2" style={{ marginBottom: "2rem", gap: "2rem" }}>
            <div className="score-card" style={{ padding: "1.5rem" }}>
               <div style={{ color: "var(--text-muted)", fontSize: "0.85rem", textTransform: "uppercase" }}>Core ML Dataset</div>
-              <div className="score-value" style={{ margin: "0.5rem 0", fontSize: "2.5rem" }}>{summary.total_articles}</div>
+              <div className="score-value" style={{ margin: "0.5rem 0", fontSize: "3rem" }}>{summary.total_articles}</div>
+              <div className="badge badge-topic" style={{ marginTop: "0.5rem", width: "fit-content", margin: "0 auto" }}>
+                {summary.unique_ml_topics ?? 4} Rigid Base Categories
+              </div>
            </div>
-           <div className="score-card" style={{ padding: "1.5rem", borderColor: "rgba(63, 185, 80, 0.4)" }}>
-              <div style={{ color: "var(--text-muted)", fontSize: "0.85rem", textTransform: "uppercase" }}>Live Trend Pool</div>
-              <div className="score-value" style={{ margin: "0.5rem 0", fontSize: "2.5rem", color: "var(--success-color)" }}>{summary.api_articles_count ?? 0}</div>
-           </div>
-           <div className="score-card" style={{ padding: "1.5rem" }}>
-              <div style={{ color: "var(--text-muted)", fontSize: "0.85rem", textTransform: "uppercase" }}>Topics Identified</div>
-              <div className="score-value" style={{ margin: "0.5rem 0", fontSize: "2.5rem" }}>{summary.unique_topics}</div>
+           
+           <div className="score-card" style={{ padding: "1.5rem", borderTop: "3px solid var(--success-color)" }}>
+              <div style={{ color: "var(--success-color)", fontSize: "0.85rem", textTransform: "uppercase", fontWeight: "bold" }}>Live Trend Pool</div>
+              <div className="score-value" style={{ margin: "0.5rem 0", fontSize: "3rem", color: "var(--text-main)" }}>{summary.api_articles_count ?? 0}</div>
+              <div className="badge badge-topic" style={{ marginTop: "0.5rem", width: "fit-content", margin: "0 auto", color: "var(--success-color)", border: "1px solid var(--success-color)", background: "#f0faf0" }}>
+                 {summary.unique_api_topics ?? 0} Dynamic Live Categories
+              </div>
            </div>
         </div>
       )}
@@ -140,10 +143,10 @@ export default function AdminPanel() {
         </div>
 
         {/* TRAINING CONTROLS */}
-        <div style={{ marginTop: "3rem", padding: "2rem", background: "rgba(0,0,0,0.2)", borderRadius: "16px", textAlign: "center" }}>
-          <h3 style={{ marginBottom: "1.5rem", color: "white" }}>Core Model Controls</h3>
+        <div style={{ marginTop: "3rem", padding: "2rem", background: "#f8f9fa", borderRadius: "8px", textAlign: "center", border: "1px solid #e9ecef" }}>
+          <h3 style={{ marginBottom: "1.5rem", color: "var(--text-main)" }}>Core Model Controls</h3>
           <div style={{ display: "flex", gap: "1rem", justifyContent: "center" }}>
-            <button className="btn" type="button" onClick={() => trainModel(false)} disabled={loading} style={{ background: "rgba(59, 130, 246, 0.4)" }}>
+            <button className="btn" type="button" onClick={() => trainModel(false)} disabled={loading} style={{ background: "var(--primary-color)" }}>
               Train Model
             </button>
             <button className="btn" type="button" onClick={() => trainModel(true)} disabled={loading} style={{ background: "var(--danger-color)" }}>

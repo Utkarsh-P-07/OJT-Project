@@ -52,10 +52,10 @@ export default function DashboardPage() {
           </div>
 
           <h2 className="section-title">Topic Evolution Over Time</h2>
-          <div className="chart-container glass-panel" style={{ background: "rgba(0,0,0,0.2)" }}>
+          <div className="chart-container glass-panel" style={{ background: "#ffffff", border: "1px solid var(--border-color)", boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={trends.chart_data || []}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                 <XAxis dataKey="period_key" stroke="var(--text-muted)" />
                 <YAxis stroke="var(--text-muted)" />
                 <Tooltip contentStyle={{ backgroundColor: "var(--bg-surface)", borderColor: "var(--border-color)", borderRadius: "8px" }} />
@@ -68,7 +68,7 @@ export default function DashboardPage() {
             </ResponsiveContainer>
           </div>
           <p style={{ marginTop: "1rem", color: "var(--text-muted)", fontSize: "0.9rem", textAlign: "center" }}>
-            ( Note: Currently waiting for comprehensive historical dataset to populate the full chart )
+            ( Note: The dashboard actively maps your Live API sync history to project future content trajectories )
           </p>
         </div>
       ) : (

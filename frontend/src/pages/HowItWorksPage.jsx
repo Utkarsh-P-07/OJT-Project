@@ -10,8 +10,8 @@ export default function HowItWorksPage() {
 
       <div style={{ display: "flex", flexDirection: "column", gap: "2.5rem" }}>
         {/* Section 1 */}
-        <div style={{ background: "rgba(255,255,255,0.03)", padding: "2rem", borderRadius: "16px", borderLeft: "4px solid var(--primary-color)" }}>
-          <h2 style={{ fontSize: "1.5rem", color: "white", marginBottom: "1rem", display: "flex", alignItems: "center", gap: "10px" }}>
+        <div style={{ background: "#ffffff", padding: "2rem", borderRadius: "8px", borderLeft: "4px solid var(--primary-color)", border: "1px solid var(--border-color)" }}>
+          <h2 style={{ fontSize: "1.5rem", color: "var(--text-main)", marginBottom: "1rem", display: "flex", alignItems: "center", gap: "10px" }}>
              🧠 1. Topic Classification
           </h2>
           <p style={{ color: "var(--text-muted)", lineHeight: 1.8 }}>
@@ -21,19 +21,19 @@ export default function HowItWorksPage() {
         </div>
 
         {/* Section 2 */}
-        <div style={{ background: "rgba(255,255,255,0.03)", padding: "2rem", borderRadius: "16px", borderLeft: "4px solid var(--accent-color)" }}>
-          <h2 style={{ fontSize: "1.5rem", color: "white", marginBottom: "1rem", display: "flex", alignItems: "center", gap: "10px" }}>
+        <div style={{ background: "#ffffff", padding: "2rem", borderRadius: "8px", borderLeft: "4px solid var(--accent-color)", border: "1px solid var(--border-color)" }}>
+          <h2 style={{ fontSize: "1.5rem", color: "var(--text-main)", marginBottom: "1rem", display: "flex", alignItems: "center", gap: "10px" }}>
              📈 2. Real-Time Trend Scoring
           </h2>
           <p style={{ color: "var(--text-muted)", lineHeight: 1.8 }}>
-            Ever wonder how "Trending" an article is? The backend actively fetches the last 50 news articles stored into our database and converts them into high-dimensional vectors. 
-            By calculating the <strong>Cosine Similarity</strong> between your specific article and recent news events, it generates a Trend Score (out of 100). The higher the score, the more your article aligns with exactly what the world is talking about right now!
+            Ever wonder how "Trending" an article is? The backend actively fetches the most recent live news articles from our dedicated API extraction pipeline and converts them into high-dimensional vectors. 
+            By calculating the <strong>Cosine Similarity</strong> between your specific article and the live news events, it generates a Core Trend Score (out of 100). The higher the score, the more your article aligns with exactly what the world is talking about right now!
           </p>
         </div>
 
         {/* Section 3 */}
-        <div style={{ background: "rgba(255,255,255,0.03)", padding: "2rem", borderRadius: "16px", borderLeft: "4px solid var(--success-color)" }}>
-          <h2 style={{ fontSize: "1.5rem", color: "white", marginBottom: "1rem", display: "flex", alignItems: "center", gap: "10px" }}>
+        <div style={{ background: "#ffffff", padding: "2rem", borderRadius: "8px", borderLeft: "4px solid var(--success-color)", border: "1px solid var(--border-color)" }}>
+          <h2 style={{ fontSize: "1.5rem", color: "var(--text-main)", marginBottom: "1rem", display: "flex", alignItems: "center", gap: "10px" }}>
              📊 3. Predictive Dashboard Analytics
           </h2>
           <p style={{ color: "var(--text-muted)", lineHeight: 1.8 }}>
@@ -42,8 +42,8 @@ export default function HowItWorksPage() {
         </div>
 
         {/* Section 4 */}
-        <div style={{ background: "rgba(255,255,255,0.03)", padding: "2rem", borderRadius: "16px", borderLeft: "4px solid var(--warning-color)" }}>
-          <h2 style={{ fontSize: "1.5rem", color: "white", marginBottom: "1rem", display: "flex", alignItems: "center", gap: "10px" }}>
+        <div style={{ background: "#ffffff", padding: "2rem", borderRadius: "8px", borderLeft: "4px solid var(--warning-color)", border: "1px solid var(--border-color)" }}>
+          <h2 style={{ fontSize: "1.5rem", color: "var(--text-main)", marginBottom: "1rem", display: "flex", alignItems: "center", gap: "10px" }}>
              🔒 4. Role Isolation
           </h2>
           <p style={{ color: "var(--text-muted)", lineHeight: 1.8 }}>
