@@ -23,21 +23,21 @@ export default function HowItWorksPage() {
         {/* Section 2 */}
         <div style={{ background: "#ffffff", padding: "2rem", borderRadius: "8px", borderLeft: "4px solid var(--accent-color)", border: "1px solid var(--border-color)" }}>
           <h2 style={{ fontSize: "1.5rem", color: "var(--text-main)", marginBottom: "1rem", display: "flex", alignItems: "center", gap: "10px" }}>
-             📈 2. Real-Time Trend Scoring
+             📈 2. Topic Concept Drift (PSI & KL)
           </h2>
           <p style={{ color: "var(--text-muted)", lineHeight: 1.8 }}>
-            Ever wonder how "Trending" an article is? The backend actively fetches the most recent live news articles from our dedicated API extraction pipeline and converts them into high-dimensional vectors. 
-            By calculating the <strong>Cosine Similarity</strong> between your specific article and the live news events, it generates a Core Trend Score (out of 100). The higher the score, the more your article aligns with exactly what the world is talking about right now!
+            Ever wonder if the media narrative is shifting? The backend actively fetches real-world Live API news and compares the current topic distributions against your historical master dataset. 
+            By calculating the <strong>Population Stability Index (PSI)</strong> and <strong>Kullback-Leibler (KL) Divergence</strong>, it generates a strict Drift Score. A high score means the current news stream has fundamentally diverged from historical norms!
           </p>
         </div>
 
         {/* Section 3 */}
         <div style={{ background: "#ffffff", padding: "2rem", borderRadius: "8px", borderLeft: "4px solid var(--success-color)", border: "1px solid var(--border-color)" }}>
           <h2 style={{ fontSize: "1.5rem", color: "var(--text-main)", marginBottom: "1rem", display: "flex", alignItems: "center", gap: "10px" }}>
-             📊 3. Predictive Dashboard Analytics
+             📊 3. Statistical Drift Dashboard
           </h2>
           <p style={{ color: "var(--text-muted)", lineHeight: 1.8 }}>
-            The <strong>Insights & Trends</strong> dashboard doesn't just show history; it models the future. By clustering topics by timeframe (Week/Month) and fitting a Linear Regression model, the system identifies negative or positive sloped trajectories. Topics are then automatically labeled as <em>Increasing</em>, <em>Decreasing</em>, or <em>Stable</em> based on statistical trajectories, helping you pinpoint the next viral stories.
+            The <strong>Topic Drift Dashboard</strong> actively compares baseline distributions with the current landscape side-by-side. Rather than abstract trajectories, it computes the exact PSI and KL metrics for every individual topic, flagging anomalies visually. This allows you to instantly pinpoint not just what the topic is, but whether its structural frequency is currently experiencing a significant global shift.
           </p>
         </div>
 

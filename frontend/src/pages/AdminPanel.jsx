@@ -102,15 +102,15 @@ export default function AdminPanel() {
 
       <div style={{ maxWidth: "600px", margin: "0 auto" }}>
         
-        {/* CSV UPLOAD FORM */}
+        {/* TXT UPLOAD FORM */}
         <form onSubmit={handleUpload}>
-          <div className="file-upload-zone" onClick={() => document.getElementById("csvUpload").click()}>
-            <h2>Upload CSV Dataset</h2>
-            <p>{file ? file.name : "Must have 'date', 'text', and 'topic' columns."}</p>
+          <div className="file-upload-zone" onClick={() => document.getElementById("txtUpload").click()}>
+            <h2>Upload TXT Dataset</h2>
+            <p>{file ? file.name : "Must have 'date', 'text', and 'topic' columns (tab or comma separated)."}</p>
             <input
-              id="csvUpload"
+              id="txtUpload"
               type="file"
-              accept=".csv"
+              accept=".txt,.csv"
               style={{ display: "none" }}
               onChange={(e) => setFile(e.target.files[0])}
             />
@@ -118,7 +118,7 @@ export default function AdminPanel() {
 
           <div style={{ marginTop: "1rem", textAlign: "center" }}>
             <button className="btn" type="submit" disabled={!file || loading}>
-              {loading ? "..." : "Upload & Save CSV"}
+              {loading ? "..." : "Upload & Save TXT"}
             </button>
           </div>
         </form>

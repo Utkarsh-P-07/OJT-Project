@@ -91,12 +91,26 @@ export default function AnalyzePage() {
               </div>
 
               <div className="score-card">
-                <div style={{ fontSize: "0.9rem", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "1px" }}>Live Trend Score</div>
-                <div className={`score-value score-${result.trend_label.split(" ")[0].toLowerCase()}`}>
-                  {result.trend_score.toFixed(1)}<span style={{ fontSize: "1.5rem", color: "var(--text-muted)" }}>/100</span>
+                <div style={{ fontSize: "0.9rem", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "1px" }}>Topic Drift Score (PSI)</div>
+                <div className={`score-value`} style={{ fontSize: "2.5rem", fontWeight: "bold",
+                  color: result.drift_label?.includes('High') ? "var(--danger-color)" : 
+                         result.drift_label?.includes('Moderate') ? "var(--warning-color)" : 
+                         "var(--success-color)" 
+                }}>
+                  {result.drift_score?.toFixed(3) || "0.000"}
                 </div>
                 <div className="badge" style={{ marginTop: "0.5rem" }}>
-                  {result.trend_label}
+                  {result.drift_label}
+                </div>
+              </div>
+              
+              <div className="score-card" style={{ marginTop: "1rem" }}>
+                <div style={{ fontSize: "0.9rem", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "1px" }}>Category Text Similarity</div>
+                <div className={`score-value`} style={{ fontSize: "2rem", fontWeight: "bold", color: "var(--accent-color)" }}>
+                  {result.category_similarity?.toFixed(1) || "0.0"} <span style={{ fontSize: "1.2rem", color: "var(--text-muted)" }}>/100</span>
+                </div>
+                <div style={{ fontSize: "0.8rem", color: "var(--text-muted)", marginTop: "0.5rem" }}>
+                  (Compared strictly against live {result.topic} articles)
                 </div>
               </div>
 
@@ -109,7 +123,7 @@ export default function AnalyzePage() {
             </div>
           ) : (
             <div style={{ height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--text-muted)", textAlign: "center", padding: "2rem", border: "1px dashed var(--border-color)", borderRadius: "12px" }}>
-              Submit an article to see its Topic Classification and Live Trend Score plotted against the current web stream.
+              Submit an article to see its Topic Classification, Topic Drift Score (PSI), and Category-Specific Text Similarity against live web streams.
             </div>
           )}
         </div>

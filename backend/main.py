@@ -2,20 +2,18 @@ import io
 import logging
 from dotenv import load_dotenv
 load_dotenv()
-from typing import Literal
 
 import pandas as pd
 from fastapi import FastAPI, File, HTTPException, Query, UploadFile, Form, APIRouter, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from sklearn.metrics.pairwise import cosine_similarity
 
 from dependencies import verify_admin_role, verify_user_role
-from database import (save_articles, save_live_news, get_recent_live_news, get_all_articles, get_all_live_news, get_dataset_summary, news_articles)
+from database import (save_articles, save_live_news, get_all_articles, get_all_live_news, get_dataset_summary, news_articles)
 from preprocess import clean_text
 from vectorizer import fit_transform, get_top_terms, _vectorizer
 from model import train_model, predict_topic, load_model
 from ocr import extract_text_from_pdf, extract_text_from_image
-from trend import calculate_trend_score, predict_future_trends
+from drift import calculate_topic_drift, get_article_drift_status
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -42,17 +40,26 @@ admin_router = APIRouter(prefix="/admin", dependencies=[Depends(verify_admin_rol
 async def upload_dataset(file: UploadFile = File(...)):
     contents = await file.read()
     try:
-        # utf-8-sig automatically strips BOM if present
-        df = pd.read_csv(io.BytesIO(contents), encoding="utf-8-sig")
+        import csv
+        # Automatically determine if comma or tab separated safely without breaking on quotes
+        sep = "\t" if b"\t" in contents[:50000] else ","
+        try:
+            df = pd.read_csv(io.BytesIO(contents), encoding="utf-8-sig", sep=sep, on_bad_lines="skip")
+        except Exception:
+            # If quote parsing crashes (e.g. ' ' expected after '\"'), retry ignoring quotes entirely
+            df = pd.read_csv(io.BytesIO(contents), encoding="utf-8-sig", sep=sep, quoting=csv.QUOTE_NONE, on_bad_lines="skip")
         
         # AG News CSVs usually lack headers entirely. If there are exactly 3 columns 
         # and the first column's name is just an integer (e.g. "3"), intercept and reload it!
         if len(df.columns) == 3 and str(df.columns[0]).strip().replace('"', '').isdigit():
-            df = pd.read_csv(io.BytesIO(contents), header=None, encoding="utf-8-sig")
+            try:
+                df = pd.read_csv(io.BytesIO(contents), header=None, encoding="utf-8-sig", sep=sep, on_bad_lines="skip")
+            except Exception:
+                df = pd.read_csv(io.BytesIO(contents), header=None, encoding="utf-8-sig", sep=sep, quoting=csv.QUOTE_NONE, on_bad_lines="skip")
             df.columns = ["class index", "title", "description"]
             
     except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Could not parse CSV: {e}")
+        raise HTTPException(status_code=400, detail=f"Could not parse TXT dataset: {e}")
         
     # Strip everything aggressively
     df.columns = [str(c).replace('\ufeff', '').strip().lower() for c in df.columns]
@@ -89,7 +96,7 @@ async def upload_dataset(file: UploadFile = File(...)):
     if missing_cols:
         raise HTTPException(
             status_code=400, 
-            detail=f"CSV is missing required column(s): {', '.join(missing_cols)}. (Found: {', '.join(df.columns)})"
+            detail=f"Dataset is missing required column(s): {', '.join(missing_cols)}. (Found: {', '.join(df.columns)})"
         )
         
     df["clean_text"] = df["text"].fillna("").astype(str).apply(clean_text)
@@ -184,37 +191,52 @@ async def analyze_article(text: str = Form(None), file: UploadFile = File(None))
     cleaned_text = clean_text(article_text)
     topic = predict_topic(cleaned_text)
     
-    # TF-IDF Cosine Similarity strictly against Live News Pipeline
-    recent_docs = get_recent_live_news(limit=50)
-    recent_texts = [d.get("text", "") for d in recent_docs if "text" in d]
+    # Calculate Statistical Drift for the predicted topic
+    ref_docs = get_all_articles()
+    cur_docs = get_all_live_news()
     
-    trend_data = calculate_trend_score(cleaned_text, _vectorizer, recent_texts)
+    ref_topics = [d.get("topic", "Unknown") for d in ref_docs if "topic" in d]
+    cur_topics = [d.get("topic", "Unknown") for d in cur_docs if "topic" in d]
+    
+    all_drift_data = calculate_topic_drift(ref_topics, cur_topics)
+    drift_data = get_article_drift_status(topic, all_drift_data)
+    
+    # Explicitly compare the user input text strictly against the SAME category as requested.
+    category_texts = [d.get("text", "") for d in cur_docs if d.get("topic") == topic]
+    content_similarity = 0.0
+    if category_texts:
+         try:
+             from sklearn.metrics.pairwise import cosine_similarity
+             from vectorizer import _vectorizer
+             input_vec = _vectorizer.transform([cleaned_text])
+             cat_vecs = _vectorizer.transform(category_texts)
+             sims = cosine_similarity(input_vec, cat_vecs)
+             content_similarity = float(sims.mean()) * 100 * 5 # scale up slightly for visibility
+             content_similarity = min(max(content_similarity, 0), 100)
+         except Exception:
+             pass
     
     return {
         "original_text": article_text[:500] + ("..." if len(article_text) > 500 else ""),
         "topic": topic,
-        "trend_score": trend_data["score"],
-        "trend_label": trend_data["label"]
+        "drift_score": drift_data["score"],
+        "drift_label": drift_data["label"],
+        "category_similarity": round(content_similarity, 1)
     }
 
-@user_router.get("/get-trend")
-def get_user_trend(group_by: str = Query(default="month", regex="^(day|week|month)$")):
-    # Trajectories built entirely on Live API history
-    articles = get_all_live_news()
-    if not articles:
-        return {"message": "No Live API data available yet."}
+@user_router.get("/get-drift")
+def get_user_drift():
+    ref_docs = get_all_articles()
+    cur_docs = get_all_live_news()
+    
+    if not ref_docs or not cur_docs:
+        return {"message": "Insufficient data in either historical or live DB to calculate drift."}
         
-    data = predict_future_trends(articles, group_by=group_by)
-    return data
-
-@user_router.get("/get-prediction")
-def get_user_prediction(group_by: str = Query(default="month", regex="^(day|week|month)$")):
-    # Predictions extracted entirely from Live API history
-    articles = get_all_live_news()
-    if not articles:
-        return {"predictions": {}}
-    data = predict_future_trends(articles, group_by=group_by)
-    return {"predictions": data.get("predictions", {})}
+    ref_topics = [d.get("topic", "Unknown") for d in ref_docs if "topic" in d]
+    cur_topics = [d.get("topic", "Unknown") for d in cur_docs if "topic" in d]
+    
+    drift_data = calculate_topic_drift(ref_topics, cur_topics)
+    return drift_data
 
 app.include_router(admin_router)
 app.include_router(user_router)
