@@ -1,106 +1,69 @@
-import { Routes, Route, Link, useLocation, Navigate, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
-import axios from "axios";
-import RoleSelectPage from "./pages/RoleSelectPage";
-import AdminPanel from "./pages/AdminPanel";
-import AnalyzePage from "./pages/AnalyzePage";
-import DashboardPage from "./pages/DashboardPage";
-import HowItWorksPage from "./pages/HowItWorksPage";
+import { useState } from 'react';
+import axios from 'axios';
+import FileUpload from './components/FileUpload';
+import './index.css';
 
-export default function App() {
-  const { pathname } = useLocation();
-  const navigate = useNavigate();
-  const [role, setRole] = useState(localStorage.getItem("app_role"));
+function App() {
+  const [file, setFile] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState(null);
+  const [error, setError] = useState('');
 
-  useEffect(() => {
-    // Set up axios interceptor globally to securely attach the x-user-role header.
-    const requestInterceptor = axios.interceptors.request.use((config) => {
-      const currentRole = localStorage.getItem("app_role") || "";
-      config.headers["x-user-role"] = currentRole;
-      return config;
-    });
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!file) {
+      setError("Please select a file to upload.");
+      return;
+    }
+    
+    setError('');
+    setResult(null);
+    setLoading(true);
 
-    return () => {
-      axios.interceptors.request.eject(requestInterceptor);
-    };
-  }, []);
+    const formData = new FormData();
+    formData.append("file", file);
 
-  const handleSetRole = (newRole) => {
-    localStorage.setItem("app_role", newRole);
-    setRole(newRole);
-    if (newRole === "admin") navigate("/admin");
-    else navigate("/user/how-it-works");
+    try {
+      const response = await axios.post("http://localhost:8000/analyze-news", formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      setResult(response.data);
+    } catch (err) {
+      const msg = err.response?.data?.detail || err.message || "An error occurred during analysis.";
+      setError(msg);
+    } finally {
+      setLoading(false);
+    }
   };
-
-  const handleLogout = () => {
-    localStorage.removeItem("app_role");
-    setRole(null);
-    navigate("/");
-  };
-
-  if (!role) {
-    return <RoleSelectPage onSelectRole={handleSetRole} />;
-  }
-
-  const navLinks = role === "admin" 
-    ? [{ path: "/admin", label: "Dataset & Model HQ" }]
-    : [
-        { path: "/user/how-it-works", label: "How It Works" },
-        { path: "/user/analyze", label: "Article Analysis" },
-        { path: "/user/dashboard", label: "Insights & Trends" }
-      ];
 
   return (
     <div className="app-container">
-      <nav className="nav-bar">
-        <div className="nav-brand" style={{ cursor: "default" }}>
-          <span className="nav-brand-dot" />
-          NewsDrift {role === "admin" ? "Admin" : "User"}
+      <h1>News Drift Detector</h1>
+      
+      <FileUpload 
+        file={file} 
+        setFile={setFile} 
+        onSubmit={handleSubmit} 
+        loading={loading} 
+      />
+
+      {error && <div className="error-msg">{error}</div>}
+
+      {result && (
+        <div className={`result-card ${result.drift ? 'drift' : 'no-drift'}`}>
+          <div className="result-score">
+            Average Similarity Score: <strong>{result.similarity_score}</strong>
+          </div>
+          <div className="result-status">
+            {result.message} 
+            {result.drift ? ' 🚨' : ' ✅'}
+          </div>
         </div>
-        <div className="nav-links" style={{ display: 'flex', alignItems: 'center' }}>
-          {navLinks.map(({ path, label }) => (
-            <Link
-              key={path}
-              to={path}
-              className={`nav-link${pathname === path ? " active" : ""}`}
-            >
-              {label}
-            </Link>
-          ))}
-          <button 
-            onClick={handleLogout} 
-            className="btn" 
-            style={{ padding: '0.4rem 1rem', fontSize: '0.9rem', marginLeft: '1rem', background: '#fafafa', color: "var(--text-main)", border: '1px solid var(--border-color)' }}
-          >
-            Switch Role
-          </button>
-        </div>
-      </nav>
-
-      <div className="page-content">
-        <Routes>
-          <Route path="/" element={<Navigate to={role === "admin" ? "/admin" : "/user/how-it-works"} replace />} />
-          
-          {role === "admin" && (
-            <Route path="/admin" element={<AdminPanel />} />
-          )}
-
-          {role === "user" && (
-            <>
-              <Route path="/user/how-it-works" element={<HowItWorksPage />} />
-              <Route path="/user/analyze" element={<AnalyzePage />} />
-              <Route path="/user/dashboard" element={<DashboardPage />} />
-            </>
-          )}
-
-          {/* Fallback to root if path is wrong or unauthorized */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </div>
-
-      <footer>
-        NewsDrift Pro &mdash; AI Topic & Trend Analysis Roles
-      </footer>
+      )}
     </div>
   );
 }
+
+export default App;
