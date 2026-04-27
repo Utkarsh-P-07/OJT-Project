@@ -17,6 +17,11 @@ from db.database import init_db, save_history, get_history, create_user, get_use
 SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM = "HS256"
 TOKEN_EXPIRE_HOURS = int(os.getenv("TOKEN_EXPIRE_HOURS", 24))
+MAX_FILE_SIZE_MB = 20
+ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "*").split(",")
+
+if not SECRET_KEY:
+    raise RuntimeError("SECRET_KEY environment variable is not set.")
 
 bearer_scheme = HTTPBearer()
 
@@ -24,7 +29,7 @@ app = FastAPI(title="News Drift Detection API")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -73,6 +78,8 @@ def startup_event():
 
 @app.post("/auth/register")
 def register(body: RegisterRequest):
+    if len(body.password) < 8:
+        raise HTTPException(status_code=400, detail="Password must be at least 8 characters.")
     if get_user_by_email(body.email):
         raise HTTPException(status_code=400, detail="Email already registered")
     create_user(body.email, body.name, hash_password(body.password))
@@ -95,14 +102,19 @@ def me(current_user=Depends(get_current_user)):
 @app.post("/analyze-news")
 async def analyze_news(file: UploadFile = File(...), current_user=Depends(get_current_user)):
     contents = await file.read()
+
     if not contents:
         raise HTTPException(status_code=400, detail="The uploaded file is empty.")
+
+    if len(contents) > MAX_FILE_SIZE_MB * 1024 * 1024:
+        raise HTTPException(status_code=400, detail=f"File exceeds the {MAX_FILE_SIZE_MB}MB size limit.")
+
     try:
         document_lines = process_uploaded_file(contents, file.filename)
     except ValueError as ve:
         raise HTTPException(status_code=400, detail=str(ve))
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"File processing failed: {str(e)}")
+    except Exception:
+        raise HTTPException(status_code=500, detail="File processing failed.")
 
     if not document_lines:
         raise HTTPException(
@@ -116,7 +128,7 @@ async def analyze_news(file: UploadFile = File(...), current_user=Depends(get_cu
             "slight_drift": "Slight Drift",
             "drift":        "Drift Detected"
         }
-        save_history(file.filename, float(avg_score), status)
+        save_history(file.filename, float(avg_score), status, current_user["email"])
         return {
             "similarity_score": round(avg_score, 4),
             "status": status,
@@ -124,9 +136,9 @@ async def analyze_news(file: UploadFile = File(...), current_user=Depends(get_cu
         }
     except ValueError as ve:
         raise HTTPException(status_code=400, detail=str(ve))
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}")
+    except Exception:
+        raise HTTPException(status_code=500, detail="Analysis failed.")
 
 @app.get("/history")
 def read_history(current_user=Depends(get_current_user)):
-    return get_history()
+    return get_history(current_user["email"])

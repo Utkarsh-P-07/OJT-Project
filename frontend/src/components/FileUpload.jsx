@@ -1,6 +1,12 @@
 const FileUpload = ({ file, setFile, onSubmit, loading, error }) => {
   const handleChange = (e) => {
-    if (e.target.files?.[0]) setFile(e.target.files[0]);
+    const selected = e.target.files?.[0];
+    if (!selected) return;
+    if (selected.size > 20 * 1024 * 1024) {
+      alert('File exceeds the 20MB size limit.');
+      return;
+    }
+    setFile(selected);
   };
 
   return (

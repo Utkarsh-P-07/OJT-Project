@@ -15,6 +15,10 @@ const AuthPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    if (mode === 'signup' && form.password.length < 8) {
+      setError('Password must be at least 8 characters.');
+      return;
+    }
     setLoading(true);
     try {
       const endpoint = mode === 'login' ? '/auth/login' : '/auth/register';
