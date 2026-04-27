@@ -1,10 +1,13 @@
 fastapi
 uvicorn
 python-multipart
+pymongo
+python-dotenv
+bcrypt
+python-jose[cryptography]
 scikit-learn
 nltk
 numpy
-pandas
 PyPDF2
-pytesseract
+easyocr
 pillow

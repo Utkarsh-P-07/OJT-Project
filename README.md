@@ -1,42 +1,53 @@
-# News Drift Detection System
+# News Drift Detector
 
-An end-to-end full stack application that detects topic drift between historical and current news articles.
+Detects when news content drifts away from a reference corpus using TF-IDF and Cosine Similarity.
 
-## Tech Stack
-- **Backend**: Python 3, FastAPI, scikit-learn, NLTK
-- **Frontend**: React (Vite), Axios, CSS (Inter Font)
+## Project Structure
 
-## Running the Application
+```
+OJT-Project/
+├── backend/
+│   ├── core/               # ML logic
+│   │   ├── model.py        # TF-IDF training & drift detection
+│   │   ├── file_processor.py  # TXT / PDF / Image text extraction
+│   │   └── utils.py        # NLP text cleaning
+│   ├── db/
+│   │   └── database.py     # MongoDB connection & queries
+│   ├── main.py             # FastAPI app, routes, auth
+│   ├── requirements.txt
+│   ├── .env                # (not committed)
+│   └── .env.example
+└── frontend/
+    ├── src/
+    │   ├── components/     # React components + co-located CSS
+    │   ├── context/        # AuthContext
+    │   ├── styles/         # Global CSS
+    │   ├── App.jsx
+    │   └── main.jsx
+    ├── .env                # (not committed)
+    └── .env.example
+```
 
-### 1. Backend (FastAPI)
-The backend runs on `http://localhost:8000`.
+## Getting Started
 
+### Backend
 ```bash
 cd backend
 python -m venv venv
-# Activate the virtual environment:
-# Windows: .\venv\Scripts\activate
-# Mac/Linux: source venv/bin/activate
+venv/Scripts/activate        # Windows
 pip install -r requirements.txt
-
-# Start the server
-uvicorn main:app --reload
+cp .env.example .env         # fill in your values
+python -m uvicorn main:app --reload
 ```
 
-### 2. Frontend (React)
-The frontend usually runs on `http://localhost:5173`.
-
+### Frontend
 ```bash
 cd frontend
 npm install
+cp .env.example .env
 npm run dev
 ```
 
-## How It Works
-1. Upload an `old.txt` (Historical News) and a `new.txt` (Current News) file. Each line should contain text representing one article.
-2. The backend cleans the data (lowercase, remove punctuation, remove stopwords, lemmatization).
-3. The system computes TF-IDF representations.
-4. It checks the maximum cosine similarity between each new article and the historical dataset.
-5. If the average maximum similarity drops below **0.15**, it triggers a 🚨 **Drift Detected** alert.
-
-Enjoy!
+## Tech Stack
+- **Backend**: FastAPI, MongoDB, JWT auth, TF-IDF + Cosine Similarity, EasyOCR
+- **Frontend**: React, Vite, Axios

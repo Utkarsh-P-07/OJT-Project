@@ -1,24 +1,23 @@
-# Security / Environment
+# Environment
 .env
-backend/.env
-frontend/.env
 *.env
-
-# React / Node
-node_modules/
-dist/
-build/
-npm-debug.log*
 
 # Python
 __pycache__/
 *.py[cod]
 *$py.class
-.venv/
 venv/
-ENV/
-backend/topic_model.joblib
-backend/vectorizer.joblib
+.venv/
+
+# ML model artifacts (regenerated on startup)
+backend/core/model/
+backend/core/data/
+
+# Node / React
+node_modules/
+dist/
+build/
+npm-debug.log*
 
 # OS
 .DS_Store
