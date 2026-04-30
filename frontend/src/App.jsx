@@ -40,6 +40,22 @@ function App() {
     }
   };
 
+  const handleTextSubmit = async (text) => {
+    if (!text.trim()) { setError('Please enter some text.'); return; }
+    setError(''); setResult(null); setLoading(true);
+    try {
+      const { data } = await axios.post(`${import.meta.env.VITE_API_URL}/analyze-text`,
+        { text },
+        { headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' } }
+      );
+      setResult(data);
+    } catch (err) {
+      setError(err.response?.data?.detail || err.message || 'An error occurred.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const navItems = [
     { key: 'app',           label: '🔍 Detector' },
     { key: 'history',       label: '🕒 History'  },
@@ -82,6 +98,7 @@ function App() {
                 file={file}
                 setFile={setFile}
                 onSubmit={handleSubmit}
+                onTextSubmit={handleTextSubmit}
                 loading={loading}
                 error={error}
               />

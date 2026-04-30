@@ -69,6 +69,9 @@ class LoginRequest(BaseModel):
     email: str
     password: str
 
+class AnalyzeTextRequest(BaseModel):
+    text: str
+
 
 @app.on_event("startup")
 def startup_event():
@@ -142,3 +145,32 @@ async def analyze_news(file: UploadFile = File(...), current_user=Depends(get_cu
 @app.get("/history")
 def read_history(current_user=Depends(get_current_user)):
     return get_history(current_user["email"])
+
+
+@app.post("/analyze-text")
+def analyze_text(body: AnalyzeTextRequest, current_user=Depends(get_current_user)):
+    if not body.text or not body.text.strip():
+        raise HTTPException(status_code=400, detail="Text input is empty.")
+
+    document_lines = [line.strip() for line in body.text.splitlines() if line.strip()]
+
+    if not document_lines:
+        raise HTTPException(status_code=400, detail="No readable text found in input.")
+
+    try:
+        avg_score, status = detect_drift(document_lines)
+        messages = {
+            "no_drift":     "No Drift",
+            "slight_drift": "Slight Drift",
+            "drift":        "Drift Detected"
+        }
+        save_history("typed-input", float(avg_score), status, current_user["email"])
+        return {
+            "similarity_score": round(avg_score, 4),
+            "status": status,
+            "message": messages[status]
+        }
+    except ValueError as ve:
+        raise HTTPException(status_code=400, detail=str(ve))
+    except Exception:
+        raise HTTPException(status_code=500, detail="Analysis failed.")
