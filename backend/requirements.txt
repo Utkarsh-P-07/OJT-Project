@@ -9,7 +9,4 @@ scikit-learn
 nltk
 numpy
 PyPDF2
-easyocr==1.7.1
-python-bidi==0.4.2
-pillow
 certifi
