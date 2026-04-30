@@ -14,7 +14,10 @@ def get_db():
         _client = MongoClient(
             MONGO_URI,
             tlsCAFile=certifi.where(),
+            tlsAllowInvalidCertificates=False,
             serverSelectionTimeoutMS=30000,
+            connectTimeoutMS=30000,
+            socketTimeoutMS=30000,
         )
     return _client[DB_NAME]
 
