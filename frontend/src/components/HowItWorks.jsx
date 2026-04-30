@@ -1,8 +1,8 @@
 import './HowItWorks.css';
 
 const steps = [
-  { icon: '☁️', title: 'Upload',     desc: 'Select a .txt, .pdf, or image file containing news content.' },
-  { icon: '🔤', title: 'Extract',    desc: 'Text is extracted from your file — OCR is used for images.' },
+  { icon: '☁️', title: 'Upload',     desc: 'Select a .txt or .pdf file containing news content.' },
+  { icon: '🔤', title: 'Extract',    desc: 'Text is extracted from your file — PDF text layer is parsed directly.' },
   { icon: '🧹', title: 'Clean',      desc: 'Text is lowercased, tokenized, stop-words removed, and lemmatized.' },
   { icon: '📐', title: 'Vectorize',  desc: 'Cleaned text is transformed into TF-IDF vectors.' },
   { icon: '📏', title: 'Compare',    desc: 'Cosine similarity is computed against the reference corpus.' },
@@ -11,8 +11,7 @@ const steps = [
 
 const formats = [
   { icon: '📄', label: '.txt', desc: 'Plain text files' },
-  { icon: '📕', label: '.pdf', desc: 'PDF documents' },
-  { icon: '🖼️', label: '.png / .jpg', desc: 'Images via OCR' },
+  { icon: '📕', label: '.pdf', desc: 'PDF documents (text layer required)' },
 ];
 
 const HowItWorks = () => (
