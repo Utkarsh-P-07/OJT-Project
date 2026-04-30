@@ -122,7 +122,7 @@ async def analyze_news(file: UploadFile = File(...), current_user=Depends(get_cu
     if not document_lines:
         raise HTTPException(
             status_code=400,
-            detail="No readable text could be extracted. If it's a PDF, ensure it has a text layer."
+            detail="No readable text could be extracted. Please ensure the file has content."
         )
     try:
         avg_score, status = detect_drift(document_lines)

@@ -8,8 +8,8 @@ const FileUpload = ({ file, setFile, onSubmit, onTextSubmit, loading, error }) =
     const selected = e.target.files?.[0];
     if (!selected) return;
     const name = selected.name.toLowerCase();
-    if (name.endsWith('.png') || name.endsWith('.jpg') || name.endsWith('.jpeg')) {
-      alert('Image upload is not supported. Please upload a .txt or .pdf file.');
+    if (!name.endsWith('.txt')) {
+      alert('Only .txt files are supported. Please upload a plain text file.');
       e.target.value = '';
       return;
     }
@@ -47,14 +47,14 @@ const FileUpload = ({ file, setFile, onSubmit, onTextSubmit, loading, error }) =
       {tab === 'file' ? (
         <form onSubmit={onSubmit}>
           <div className={`drop-zone ${file ? 'has-file' : ''}`}>
-            <input type="file" accept=".txt,.pdf" onChange={handleChange} disabled={loading} />
+            <input type="file" accept=".txt" onChange={handleChange} disabled={loading} />
             <div className="drop-zone-icon">{file ? '📄' : '☁️'}</div>
             <div className="drop-zone-label">
               {file ? 'File selected' : 'Click or drag a file here'}
             </div>
             {file
               ? <div className="drop-zone-file">{file.name}</div>
-              : <div className="drop-zone-hint">.txt · .pdf</div>
+              : <div className="drop-zone-hint">.txt only</div>
             }
           </div>
           {error && <div className="error-msg">{error}</div>}
