@@ -1,7 +1,7 @@
 from pymongo import MongoClient
 from datetime import datetime
 import os
-import ssl
+import certifi
 
 MONGO_URI = os.getenv("MONGO_URI")
 DB_NAME = os.getenv("DB_NAME")
@@ -13,8 +13,7 @@ def get_db():
     if _client is None:
         _client = MongoClient(
             MONGO_URI,
-            tls=True,
-            tlsAllowInvalidCertificates=True,
+            tlsCAFile=certifi.where(),
             serverSelectionTimeoutMS=30000,
         )
     return _client[DB_NAME]
