@@ -20,11 +20,7 @@
   background: #ffffff;
   border: 1px solid #e2e8f0;
   border-radius: 10px;
-  padding: 1rem 1.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
+  overflow: hidden;
   box-shadow: 0 1px 4px rgba(0,0,0,0.03);
   transition: box-shadow 0.2s;
   border-left: 4px solid transparent;
@@ -34,6 +30,16 @@
 .history-row.drift        { border-left-color: #ef4444; }
 .history-row.slight_drift { border-left-color: #f59e0b; }
 .history-row.no_drift     { border-left-color: #22c55e; }
+
+.history-row-summary {
+  padding: 1rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  cursor: pointer;
+  user-select: none;
+}
 
 .history-row-left {
   display: flex;
@@ -81,6 +87,70 @@
 .history-badge.slight_drift { background: #fffbeb; color: #b45309; border: 1px solid #fcd34d; }
 .history-badge.no_drift     { background: #f0fdf4; color: #15803d; border: 1px solid #86efac; }
 
+/* ── Chevron ── */
+.history-chevron {
+  font-size: 1rem;
+  color: #94a3b8;
+  transition: transform 0.2s;
+  display: inline-block;
+}
+.history-chevron.up { transform: rotate(180deg); }
+
+/* ── Expandable detail ── */
+.history-detail {
+  padding: 1rem 1.5rem 1.2rem;
+  border-top: 1px solid #e2e8f0;
+  animation: slideDown 0.2s ease;
+}
+
+.history-detail.no_drift     { background: #f0fdf4; }
+.history-detail.slight_drift { background: #fffbeb; }
+.history-detail.drift        { background: #fef2f2; }
+
+.history-detail-desc {
+  font-size: 0.88rem;
+  color: #475569;
+  line-height: 1.6;
+  margin-bottom: 1rem;
+}
+
+.history-detail-desc p { margin: 0 0 0.4rem; }
+.history-detail-desc p:last-child { margin-bottom: 0; }
+
+/* ── Score bar ── */
+.history-bar-wrap { margin-top: 0.8rem; }
+
+.history-bar-track {
+  width: 100%;
+  height: 8px;
+  background: #e2e8f0;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.history-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.6s ease;
+}
+
+.history-bar-fill.no_drift     { background: #22c55e; }
+.history-bar-fill.slight_drift { background: #f59e0b; }
+.history-bar-fill.drift        { background: #ef4444; }
+
+.history-bar-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.72rem;
+  color: #94a3b8;
+  margin-top: 0.35rem;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
 @media (max-width: 500px) {
-  .history-row { flex-direction: column; align-items: flex-start; }
+  .history-row-summary { flex-direction: column; align-items: flex-start; }
 }

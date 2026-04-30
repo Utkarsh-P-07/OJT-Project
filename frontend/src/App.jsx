@@ -50,7 +50,7 @@ function App() {
     <div className="app-layout">
       {/* Top navbar */}
       <header className="navbar">
-        <div className="navbar-brand">
+        <div className="navbar-brand" onClick={() => window.location.reload()} style={{ cursor: 'pointer' }}>
           📰 <span>News</span> Drift Detector
         </div>
         <nav className="navbar-nav">
@@ -102,6 +102,40 @@ function App() {
                     <div className="result-score-label">Average Similarity Score</div>
                     <div className={`result-status ${result.status}`}>
                       {result.message}
+                    </div>
+                    <div className={`result-description ${result.status}`}>
+                      {result.status === 'no_drift' && (
+                        <>
+                          <p>The uploaded document is <strong>closely aligned</strong> with the reference news corpus. The content, topics, and vocabulary are consistent with what the model was trained on.</p>
+                          <p>A score above <strong>0.50</strong> indicates high similarity — no significant topic shift was detected.</p>
+                        </>
+                      )}
+                      {result.status === 'slight_drift' && (
+                        <>
+                          <p>The document shows <strong>some deviation</strong> from the reference corpus. While parts of the content are recognizable, certain topics or vocabulary differ noticeably.</p>
+                          <p>A score between <strong>0.15 and 0.50</strong> suggests partial overlap — the content may cover related but diverging topics.</p>
+                        </>
+                      )}
+                      {result.status === 'drift' && (
+                        <>
+                          <p>The document is <strong>significantly different</strong> from the reference corpus. The topics, language, or style appear unrelated to the training data.</p>
+                          <p>A score below <strong>0.15</strong> indicates very low similarity — this content likely represents a completely different domain or subject area.</p>
+                        </>
+                      )}
+                    </div>
+                    <div className="result-score-bar-wrap">
+                      <div className="result-score-bar-track">
+                        <div
+                          className={`result-score-bar-fill ${result.status}`}
+                          style={{ width: `${Math.min(result.similarity_score * 100, 100)}%` }}
+                        />
+                      </div>
+                      <div className="result-score-bar-labels">
+                        <span>0.0 — Drift</span>
+                        <span>0.15</span>
+                        <span>0.50</span>
+                        <span>1.0 — No Drift</span>
+                      </div>
                     </div>
                   </div>
                 )}
