@@ -8,5 +8,5 @@ python-jose[cryptography]
 scikit-learn
 nltk
 numpy
-PyPDF2
+PyMuPDF
 certifi

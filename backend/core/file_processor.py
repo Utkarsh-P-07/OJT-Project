@@ -1,17 +1,18 @@
 import io
-import PyPDF2
+import fitz  # PyMuPDF
 
 def extract_text_from_txt(contents: bytes) -> list[str]:
     decoded = contents.decode('utf-8', errors='ignore')
     return [line.strip() for line in decoded.splitlines() if line.strip()]
 
 def extract_text_from_pdf(contents: bytes) -> list[str]:
-    pdf_reader = PyPDF2.PdfReader(io.BytesIO(contents))
+    doc = fitz.open(stream=contents, filetype="pdf")
     lines = []
-    for page in pdf_reader.pages:
-        text = page.extract_text()
+    for page in doc:
+        text = page.get_text()
         if text:
             lines.extend([l.strip() for l in text.splitlines() if l.strip()])
+    doc.close()
     return lines
 
 def process_uploaded_file(contents: bytes, filename: str) -> list[str]:
