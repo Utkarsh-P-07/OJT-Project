@@ -5,7 +5,7 @@ import os
 MONGO_URI = os.getenv("MONGO_URI")
 DB_NAME = os.getenv("DB_NAME")
 
-client = MongoClient(MONGO_URI)
+client = MongoClient(MONGO_URI, tls=True, tlsAllowInvalidCertificates=False)
 db = client[DB_NAME]
 history_collection = db["history"]
 users_collection = db["users"]
