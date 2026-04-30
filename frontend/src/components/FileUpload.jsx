@@ -2,6 +2,12 @@ const FileUpload = ({ file, setFile, onSubmit, loading, error }) => {
   const handleChange = (e) => {
     const selected = e.target.files?.[0];
     if (!selected) return;
+    const name = selected.name.toLowerCase();
+    if (name.endsWith('.png') || name.endsWith('.jpg') || name.endsWith('.jpeg')) {
+      alert('Image upload is not supported. Please upload a .txt or .pdf file.');
+      e.target.value = '';
+      return;
+    }
     if (selected.size > 20 * 1024 * 1024) {
       alert('File exceeds the 20MB size limit.');
       return;
@@ -12,14 +18,14 @@ const FileUpload = ({ file, setFile, onSubmit, loading, error }) => {
   return (
     <form onSubmit={onSubmit} className="upload-card">
       <div className={`drop-zone ${file ? 'has-file' : ''}`}>
-        <input type="file" accept=".txt,.pdf,.png,.jpg,.jpeg" onChange={handleChange} disabled={loading} />
+        <input type="file" accept=".txt,.pdf" onChange={handleChange} disabled={loading} />
         <div className="drop-zone-icon">{file ? '📄' : '☁️'}</div>
         <div className="drop-zone-label">
           {file ? 'File selected' : 'Click or drag a file here'}
         </div>
         {file
           ? <div className="drop-zone-file">{file.name}</div>
-          : <div className="drop-zone-hint">.txt · .pdf · .png · .jpg</div>
+          : <div className="drop-zone-hint">.txt · .pdf</div>
         }
       </div>
 
