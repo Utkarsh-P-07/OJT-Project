@@ -42,7 +42,7 @@ const AuthPage = () => {
         <h1>News Drift Detector</h1>
         <p>Detect when news content drifts away from expected topics using ML-powered analysis.</p>
         <div className="auth-brand-features">
-          <div className="auth-feature">📄 Supports TXT, PDF & Images</div>
+          <div className="auth-feature">📄 Supports TXT & Text Input</div>
           <div className="auth-feature">🤖 TF-IDF + Cosine Similarity</div>
           <div className="auth-feature">📊 Full analysis history</div>
         </div>
